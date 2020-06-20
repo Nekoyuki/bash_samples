@@ -23,7 +23,6 @@ bbb.JPG
 ccc.JPG
 "
 
-echo $tbl
 for i in `echo $tbl`
 do
     echo $i
