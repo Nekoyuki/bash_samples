@@ -1,74 +1,71 @@
-PROGNAME=$(basename $0)
-VERSION="1.0"
+BASENAME=`echo $1|sed 's/\.[^\.]*s//'`
 
-usage() {
-    echo "Usage: $PROGNAME [OPTIONS] FILE"
-    echo "  This script is ~."
-    echo
-    echo "Options:"
-    echo "  -h, --help"
-    echo "      --version"
-    echo "  -a, --long-a ARG"
-    echo "  -b, --long-b [ARG]"
-    echo "  -c, --long-c"
-    echo
+# Help
+#*********************************
+function usage() {
+cat <<_EOT_
+Usage: 
+  $BASENAME [-l <loop>] [-v <vdd>] hoge
+  $BASENAME -h
+
+Description:
+  Argument perser
+
+Options:"
+  -l, --loop <loop>
+  -v, --vdd <vdd>
+  -h, --help
+
+_EOT_
     exit 1
 }
 
-for OPT in "$@"
+# Options
+#*********************************
+while (( $# > 0 ))
 do
-    case $OPT in
+    case $1 in
         -h | --help)
             usage
             exit 1
             ;;
-        --version)
-            echo $VERSION
-            exit 1
-            ;;
-        -a | --long-a)
+        -l | --loop)
             if [[ -z "$2" ]] || [[ "$2" =~ ^-+ ]]; then
-                echo "$PROGNAME: option requires an argument -- $1" 1>&2
+                echo "$BASENAME: '-l|--loop' option requires an argument" 1>&2
                 exit 1
             fi
-            ARG_A=$2
+            LOOP=$2
             shift 2
             ;;
-        -b | --long-b)
+        -v | --vdd)
             if [[ -z "$2" ]] || [[ "$2" =~ ^-+ ]]; then
-                shift
-            else
-                ARG_B=$2
-                shift 2
+                echo "$BASENAME: '-v|--vdd' option requires an argument" 1>&2
+                exit 1
             fi
-            ;;
-        -c | --long-c)
-            shift 1
+            VDD=$2
+            shift 2
             ;;
         -- | -)
             shift 1
-            param+=( "$@" )
+            argv+=( "$@" )
             break
             ;;
         -*)
-            echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
+            echo "$BASENAME: unrecognized option '$1'" 1>&2
+            echo "Try '$BASENAME --help' for more information." 1>&2
             exit 1
             ;;
         *)
-            if [[ ! -z "$1" ]] && [[ ! "$1" =~ ^-+ ]]; then
-                #param=( ${param[@]} "$1" )
-                param+=( "$1" )
-                shift 1
-            fi
+            argv+=( "$1" )
+            shift
             ;;
     esac
 done
 
-if [ -z "$param" ]; then
-    echo "$PROGNAME: too few arguments" 1>&2
-    echo "Try '$PROGNAME --help' for more information." 1>&2
-    exit 1
+if [ ${#argv[@]} -eq 0 ]; then
+    usage
 fi
-echo $ARG_A
-echo $ARG_B
-echo $param
+
+echo "LOOP=${LOOP}"
+echo "VDD=${VDD}"
+echo "argv=${argv[@]}"
